@@ -1,7 +1,10 @@
 import torch.utils.data
-import soundfile
+import soundfile as sf
 import pandas as pd
 import os
+
+
+sex_to_label = {'M': False, 'F': True}
 
 
 class LibriSpeechDataset(torch.utils.data.Dataset):
@@ -47,7 +50,9 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         self.datasetid_to_sex = datasetid_to_sex
 
     def __getitem__(self, index):
-        return self.datasetid_to_filepath[index], self.datasetid_to_sex[index]
+        instance, samplerate = sf.read(self.datasetid_to_filepath[index])
+        sex = self.datasetid_to_sex[index]
+        return instance, sex_to_label[sex]
 
     def __len__(self):
         return self.n_files
