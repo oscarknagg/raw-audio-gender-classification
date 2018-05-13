@@ -8,8 +8,9 @@ sex_to_label = {'M': False, 'F': True}
 
 
 class LibriSpeechDataset(torch.utils.data.Dataset):
-    def __init__(self, subset):
+    def __init__(self, subset, length):
         self.subset = subset
+        self.instance_length = length
 
         df = pd.read_csv('../data/LibriSpeech/SPEAKERS.TXT', skiprows=11, delimiter='|', error_bad_lines=False)
         df.columns = [col.strip().replace(';', '').lower() for col in df.columns]
@@ -26,23 +27,20 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         n_files = 0
         datasetid = 0
         datasetid_to_filepath = {}
-        datasetid_to_sex = {}
+        datasetid_to_sex = {}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
         for root, folders, files in os.walk('../data/LibriSpeech/{}/'.format(subset)):
             if len(files) == 0:
                 continue
 
             librispeech_id = int(root.split('/')[-2])
 
-            # if librispeech_id == 60:
-            #     # Dodgy value
-            #     continue
-
             for f in files:
+                if not f.endswith('.flac'):
+                    continue
                 datasetid_to_filepath[datasetid] = os.path.abspath(os.path.join(root, f))
                 datasetid_to_sex[datasetid] = librispeech_id_to_sex[librispeech_id]
                 datasetid += 1
-
-            n_files += len(files)
+                n_files += 1
 
         self.n_files = n_files
 
@@ -51,6 +49,7 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         instance, samplerate = sf.read(self.datasetid_to_filepath[index])
+        instance = instance[:self.instance_length]
         sex = self.datasetid_to_sex[index]
         return instance, sex_to_label[sex]
 
