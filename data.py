@@ -28,9 +28,9 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         librispeech_id_to_sex = df[df['subset'] == subset][['id', 'sex']].to_dict()
         self.librispeech_id_to_sex = {k: v for k, v in
                                  zip(librispeech_id_to_sex['id'].values(), librispeech_id_to_sex['sex'].values())}
-        librispeech_id_to_name = df[df['subset'] == subset][['id', 'sex']].to_dict()
+        librispeech_id_to_name = df[df['subset'] == subset][['id', 'name']].to_dict()
         self.librispeech_id_to_name = {k: v for k, v in
-                                 zip(librispeech_id_to_sex['id'].values(), librispeech_id_to_sex['name'].values())}
+                                 zip(librispeech_id_to_name['id'].values(), librispeech_id_to_name['name'].values())}
 
         datasetid = 0
         self.n_files = 0
