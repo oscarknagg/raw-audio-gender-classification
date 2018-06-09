@@ -25,12 +25,17 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
 
         # Get id -> sex mapping
         librispeech_id_to_sex = df[df['subset'] == subset][['id', 'sex']].to_dict()
-        librispeech_id_to_sex = {k: v for k, v in zip(librispeech_id_to_sex['id'].values(), librispeech_id_to_sex['sex'].values())}
+        self.librispeech_id_to_sex = {k: v for k, v in
+                                 zip(librispeech_id_to_sex['id'].values(), librispeech_id_to_sex['sex'].values())}
+        librispeech_id_to_name = df[df['subset'] == subset][['id', 'sex']].to_dict()
+        self.librispeech_id_to_name = {k: v for k, v in
+                                 zip(librispeech_id_to_sex['id'].values(), librispeech_id_to_sex['name'].values())}
 
-        n_files = 0
         datasetid = 0
-        datasetid_to_filepath = {}
-        datasetid_to_sex = {}
+        self.n_files = 0
+        self.datasetid_to_filepath = {}
+        self.datasetid_to_sex = {}
+        self.datasetid_to_name = {}
         for root, folders, files in os.walk('../data/LibriSpeech/{}/'.format(subset)):
             if len(files) == 0:
                 continue
@@ -46,17 +51,13 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
                 if len(instance) <=  self.fragment_length:
                     continue
 
-                datasetid_to_filepath[datasetid] = os.path.abspath(os.path.join(root, f))
-                datasetid_to_sex[datasetid] = librispeech_id_to_sex[librispeech_id]
+                self.datasetid_to_filepath[datasetid] = os.path.abspath(os.path.join(root, f))
+                self.datasetid_to_sex[datasetid] = self.librispeech_id_to_sex[librispeech_id]
+                self.datasetid_to_name[datasetid] = self.librispeech_id_to_name[librispeech_id]
                 datasetid += 1
-                n_files += 1
+                self.n_files += 1
 
-        self.n_files = n_files
-
-        self.datasetid_to_filepath = datasetid_to_filepath
-        self.datasetid_to_sex = datasetid_to_sex
-
-        print('Finished indexing data. {} usable files found.'.format(n_files))
+        print('Finished indexing data. {} usable files found.'.format(self.n_files))
 
     def __getitem__(self, index):
         instance, samplerate = sf.read(self.datasetid_to_filepath[index])
