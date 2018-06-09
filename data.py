@@ -10,10 +10,11 @@ label_to_sex = {False: 'M', True: 'F'}
 
 
 class LibriSpeechDataset(torch.utils.data.Dataset):
-    def __init__(self, subset, length):
+    def __init__(self, subset, length, stochastic=True):
         print('Indexing data...')
         self.subset = subset
         self.fragment_length = length
+        self.stochastic = stochastic
 
         df = pd.read_csv('../data/LibriSpeech/SPEAKERS.TXT', skiprows=11, delimiter='|', error_bad_lines=False)
         df.columns = [col.strip().replace(';', '').lower() for col in df.columns]
@@ -62,7 +63,10 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         instance, samplerate = sf.read(self.datasetid_to_filepath[index])
         # Choose a random sample of the file
-        fragment_start_index = np.random.randint(0,len(instance)-self.fragment_length)
+        if self.stochastic:
+            fragment_start_index = np.random.randint(0,len(instance)-self.fragment_length)
+        else:
+            fragment_start_index = 0
         instance = instance[fragment_start_index:fragment_start_index+self.fragment_length]
         sex = self.datasetid_to_sex[index]
         return instance, sex_to_label[sex]
