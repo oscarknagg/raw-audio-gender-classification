@@ -65,6 +65,8 @@ class ConvNet(nn.Module):
                 nn.BatchNorm1d(filters)
             )
 
+        self.finalconv = nn.Conv1d(filters, filters, 3, dilation=1, padding=1)
+
         self.output = nn.Linear(filters, 1)
 
     def forward(self, x):
@@ -76,6 +78,8 @@ class ConvNet(nn.Module):
             x = F.relu(getattr(self,'conv_{}'.format(i))(x))
             x = getattr(self,'bn_{}'.format(i))(x)
             x = F.max_pool1d(x, kernel_size=3, stride=3)
+
+        x = F.relu(self.finalconv(x))
 
         x = F.max_pool1d(x, kernel_size=x.size()[2:])
         x = x.view(-1, self.filters)
