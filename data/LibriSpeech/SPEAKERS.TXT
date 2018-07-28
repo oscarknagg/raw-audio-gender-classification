@@ -734,7 +734,7 @@
 2046 | M | train-other-500  | 19.01 | kyleti
 2050 | F | train-other-500  | 28.21 | Xe Sands
 2051 | M | train-other-500  | 22.13 | Grant Petersen
-2053 | F | train-clean-360  | 25.03 | Vincent Tapia
+2053 | M | train-clean-360  | 25.03 | Vincent Tapia
 2056 | F | train-clean-360  | 22.72 | Nancy Roberts
 2060 | F | train-clean-360  | 25.02 | Julie Pandya
 2061 | F | train-clean-360  | 25.08 | Jodi Krangle
@@ -1217,7 +1217,7 @@
 3979 | F | train-clean-360  | 25.14 | Dale A. Bade
 3982 | F | train-clean-100  | 25.07 | Kate Adams
 3983 | F | train-clean-100  | 25.01 | lavocedorata
-3989 | M | train-clean-360  | 25.06 | Rayne
+3989 | F | train-clean-360  | 25.06 | Rayne
 3990 | F | train-other-500  | 28.44 | Jessi
 3992 | F | train-other-500  | 30.24 | perpetualdreamworld
 3994 | F | train-clean-360  | 25.09 | Miriam Esther Goldman
@@ -1495,7 +1495,7 @@
 5105 | M | test-clean       | 8.12  | elongman
 5115 | F | train-clean-360  | 25.01 | Terry Goodyer
 5118 | M | train-other-500  | 30.13 | klbonds
-5123 | M | train-clean-360  | 25.11 | wvthcomp
+5123 | F | train-clean-360  | 25.11 | wvthcomp
 5126 | M | train-clean-360  | 25.06 | Tom Lennon
 5132 | M | train-other-500  | 25.62 | David Stryker
 5133 | F | train-clean-360  | 25.04 | Jo Karabasz
@@ -1902,7 +1902,7 @@
 6676 | F | train-other-500  | 27.67 | Chill28
 6683 | F | train-clean-360  | 25.22 | Julia Kelley
 6685 | M | train-other-500  | 23.76 | Jonathan Drury
-6686 | M | train-clean-360  | 20.63 | Elin
+6686 | F | train-clean-360  | 20.63 | Elin
 6687 | M | train-other-500  | 27.69 | KirksVoice
 6689 | F | train-other-500  | 28.36 | Tiffany Halla Colonna
 6690 | M | train-clean-360  | 23.34 | T Michael Burke
@@ -2008,7 +2008,7 @@
 7073 | F | train-other-500  | 24.98 | Jill Janovetz
 7078 | F | train-clean-100  | 25.14 | Mary in Arkansas
 7079 | F | train-other-500  | 29.43 | Chuck Williamson
-7085 | M | train-clean-360  | 25.19 | voicebynatalie
+7085 | F | train-clean-360  | 25.19 | voicebynatalie
 7090 | M | train-clean-360  | 25.05 | Jon Sindell
 7092 | F | train-other-500  | 30.15 | Lorraine B
 7095 | M | train-clean-360  | 25.15 | Wesseling
@@ -2017,7 +2017,7 @@
 7105 | M | test-other       | 10.15 | jennycbnyn
 7107 | M | train-other-500  | 30.09 | titankin77
 7113 | F | train-clean-100  | 25.20 | Sukaina Jaffer
-7117 | F | train-clean-360  | 25.17 | Art Leung
+7117 | M | train-clean-360  | 25.17 | Art Leung
 7120 | F | train-clean-360  | 25.10 | L D Hamilton
 7121 | M | train-other-500  | 27.88 | 384403
 7125 | F | train-other-500  | 18.82 | Peggy
