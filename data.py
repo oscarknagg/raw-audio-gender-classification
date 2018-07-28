@@ -16,6 +16,11 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         self.fragment_length = length
         self.stochastic = stochastic
 
+        # Convert subset to list if it is a string
+        # This allows to handle list of multiple subsets the same a single subset
+        if isinstance(subset,str):
+            subset = [subset]
+
         df = pd.read_csv('../data/LibriSpeech/SPEAKERS.TXT', skiprows=11, delimiter='|', error_bad_lines=False)
         df.columns = [col.strip().replace(';', '').lower() for col in df.columns]
         df = df.assign(
@@ -25,10 +30,10 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         )
 
         # Get id -> sex mapping
-        librispeech_id_to_sex = df[df['subset'] == subset][['id', 'sex']].to_dict()
+        librispeech_id_to_sex = df[df['subset'].isin(subset)][['id', 'sex']].to_dict()
         self.librispeech_id_to_sex = {k: v for k, v in
                                  zip(librispeech_id_to_sex['id'].values(), librispeech_id_to_sex['sex'].values())}
-        librispeech_id_to_name = df[df['subset'] == subset][['id', 'name']].to_dict()
+        librispeech_id_to_name = df[df['subset'].isin(subset)][['id', 'name']].to_dict()
         self.librispeech_id_to_name = {k: v for k, v in
                                  zip(librispeech_id_to_name['id'].values(), librispeech_id_to_name['name'].values())}
 
@@ -37,26 +42,29 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         self.datasetid_to_filepath = {}
         self.datasetid_to_sex = {}
         self.datasetid_to_name = {}
-        for root, folders, files in os.walk('../data/LibriSpeech/{}/'.format(subset)):
-            if len(files) == 0:
-                continue
 
-            librispeech_id = int(root.split('/')[-2])
 
-            for f in files:
-                # Skip non-sound files
-                if not f.endswith('.flac'):
-                    continue
-                # Skip short files
-                instance, samplerate = sf.read(os.path.join(root, f))
-                if len(instance) <=  self.fragment_length:
+        for s in subset:
+            for root, folders, files in os.walk('../data/LibriSpeech/{}/'.format(s)):
+                if len(files) == 0:
                     continue
 
-                self.datasetid_to_filepath[datasetid] = os.path.abspath(os.path.join(root, f))
-                self.datasetid_to_sex[datasetid] = self.librispeech_id_to_sex[librispeech_id]
-                self.datasetid_to_name[datasetid] = self.librispeech_id_to_name[librispeech_id]
-                datasetid += 1
-                self.n_files += 1
+                librispeech_id = int(root.split('/')[-2])
+
+                for f in files:
+                    # Skip non-sound files
+                    if not f.endswith('.flac'):
+                        continue
+                    # Skip short files
+                    instance, samplerate = sf.read(os.path.join(root, f))
+                    if len(instance) <=  self.fragment_length:
+                        continue
+
+                    self.datasetid_to_filepath[datasetid] = os.path.abspath(os.path.join(root, f))
+                    self.datasetid_to_sex[datasetid] = self.librispeech_id_to_sex[librispeech_id]
+                    self.datasetid_to_name[datasetid] = self.librispeech_id_to_name[librispeech_id]
+                    datasetid += 1
+                    self.n_files += 1
 
         print('Finished indexing data. {} usable files found.'.format(self.n_files))
 
