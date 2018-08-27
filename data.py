@@ -4,6 +4,7 @@ import torch.utils.data
 import soundfile as sf
 import pandas as pd
 import numpy as np
+import json
 import os
 
 
@@ -12,7 +13,7 @@ label_to_sex = {False: 'M', True: 'F'}
 
 
 class LibriSpeechDataset(torch.utils.data.Dataset):
-    def __init__(self, subset, length, stochastic=True):
+    def __init__(self, subset, length, stochastic=True, cache=True):
         """
         This class subclasses the torch Dataset object. The __getitem__ function will return a raw audio sample and it's
         label.
@@ -25,6 +26,22 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         self.subset = subset
         self.fragment_length = length
         self.stochastic = stochastic
+
+        # Check if we have already indexed the files
+        cached_dictionaries_exist = os.path.exists(
+            '/data/LibriSpeech__datasetid_to_filepath__length={}.json'.format(length)
+        ) and os.path.exists(
+            PATH + '/data/LibriSpeech__datasetid_to_sex__length={}.json'.format(length)
+        )
+        if cache == True and cached_dictionaries_exist:
+            print('Cached indexes found.')
+            with open(PATH + '/data/LibriSpeech__datasetid_to_filepath__length={}.json'.format(length), 'w') as f:
+                self.datasetid_to_filepath = json.load(f)
+
+            with open(PATH + '/data/LibriSpeech__datasetid_to_sex__length={}.json'.format(length), 'w') as f:
+                self.datasetid_to_sex = json.load(f)
+
+            return
 
         # Convert subset to list if it is a string
         # This allows to handle list of multiple subsets the same a single subset
@@ -77,6 +94,14 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
                     self.n_files += 1
 
         print('Finished indexing data. {} usable files found.'.format(self.n_files))
+
+        # Save relevant dictionaries to json in order to re-use them layer
+        # The indexing takes a few minutes each time and would be nice to just perform this calculation once
+        with open(PATH + '/data/LibriSpeech__datasetid_to_filepath__length={}.json'.format(length), 'w') as f:
+            json.dump(self.datasetid_to_filepath, f)
+
+        with open(PATH + '/data/LibriSpeech__datasetid_to_sex__length={}.json'.format(length), 'w') as f:
+            json.dump(self.datasetid_to_sex, f)
 
     def __getitem__(self, index):
         instance, samplerate = sf.read(self.datasetid_to_filepath[index])
