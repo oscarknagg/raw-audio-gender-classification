@@ -4,7 +4,6 @@ Run this file to process an audio file with a particular model.
 Returns a csv file with prediction information and also a video file containing an animated prediction.
 """
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.signal import resample
 import numpy as np
 from tqdm import tqdm
@@ -103,22 +102,11 @@ segment_start_times_minutes = np.array(range(len(pred)))*step_seconds/60
 df = pd.DataFrame(data={'minute': segment_start_times_minutes, 'p': pred})
 df = df.assign(
     second=df['minute'].apply(lambda m: (m % 1)*60),
+    # Time in seconds of the start of the prediction fragment
     t_start=df['minute']*60,
-    t_end=df['minute']*60 + 3,
-    t_center=df['minute']*60 + 1.5
+    # Time in seconds of the end of the prediction fragment
+    t_end=df['minute']*60 + model_params['n_seconds'],
+    # Time in seconds of the center of the prediction fragment
+    t_center=df['minute']*60 + model_params['n_seconds']/2.
 )
-df.to_csv(PATH+'/data/results.csv',index=False)
-
-
-plt.figure(figsize=(20,7))
-plt.title('Probability of speaker being female throughout an interview')
-plt.plot(
-    segment_start_times_minutes,
-    np.array(pred)
-)
-plt.xlabel('Minutes')
-plt.xticks(range(11))
-plt.xlim((0,9))
-plt.ylabel('P(Female)')
-plt.grid()
-plt.show()
+df.to_csv(PATH+'/data/results.csv', index=False)
