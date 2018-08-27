@@ -1,4 +1,5 @@
 from config import PATH
+from tqdm import tqdm
 import torch.utils.data
 import soundfile as sf
 import pandas as pd
@@ -20,7 +21,6 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         :param stochastic: If True then we will take a random fragment from each file of sufficient length. If False we
         wil always take a fragment starting at the beginning of a file.
         """
-        print('Indexing data...')
         self.subset = subset
         self.fragment_length = length
         self.stochastic = stochastic
@@ -53,7 +53,8 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         self.datasetid_to_name = {}
 
         for s in subset:
-            for root, folders, files in os.walk(PATH+'/data/LibriSpeech/{}/'.format(s)):
+            print('Indexing {}...'.format(s))
+            for root, folders, files in tqdm(os.walk(PATH+'/data/LibriSpeech/{}/'.format(s))):
                 if len(files) == 0:
                     continue
 
