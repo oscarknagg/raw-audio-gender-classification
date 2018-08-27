@@ -21,6 +21,7 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         :param stochastic: If True then we will take a random fragment from each file of sufficient length. If False we
         wil always take a fragment starting at the beginning of a file.
         """
+        assert isinstance(length, (int, long))
         self.subset = subset
         self.fragment_length = length
         self.stochastic = stochastic
