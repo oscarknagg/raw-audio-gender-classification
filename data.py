@@ -1,3 +1,4 @@
+from config import PATH
 import torch.utils.data
 import soundfile as sf
 import pandas as pd
@@ -11,6 +12,14 @@ label_to_sex = {False: 'M', True: 'F'}
 
 class LibriSpeechDataset(torch.utils.data.Dataset):
     def __init__(self, subset, length, stochastic=True):
+        """
+        This class subclasses the torch Dataset object. The __getitem__ function will return a raw audio sample and it's
+        label.
+        :param subset: What LibriSpeech datasets to use
+        :param length: Number of audio samples to take from each file. Any files shorter than this will be ignored.
+        :param stochastic: If True then we will take a random fragment from each file of sufficient length. If False we
+        wil always take a fragment starting at the beginning of a file.
+        """
         print('Indexing data...')
         self.subset = subset
         self.fragment_length = length
@@ -21,7 +30,7 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         if isinstance(subset,str):
             subset = [subset]
 
-        df = pd.read_csv('../data/LibriSpeech/SPEAKERS.TXT', skiprows=11, delimiter='|', error_bad_lines=False)
+        df = pd.read_csv(PATH+'/data/LibriSpeech/SPEAKERS.TXT', skiprows=11, delimiter='|', error_bad_lines=False)
         df.columns = [col.strip().replace(';', '').lower() for col in df.columns]
         df = df.assign(
             sex=df['sex'].apply(lambda x: x.strip()),
@@ -43,9 +52,8 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         self.datasetid_to_sex = {}
         self.datasetid_to_name = {}
 
-
         for s in subset:
-            for root, folders, files in os.walk('../data/LibriSpeech/{}/'.format(s)):
+            for root, folders, files in os.walk(PATH+'/data/LibriSpeech/{}/'.format(s)):
                 if len(files) == 0:
                     continue
 
