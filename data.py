@@ -27,28 +27,41 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         self.fragment_length = length
         self.stochastic = stochastic
 
+        print('Initialising LibriSpeechDataset with length = {} and subsets = {}'.format(length, subsets))
+
         # Convert subset to list if it is a string
         # This allows to handle list of multiple subsets the same a single subset
         if isinstance(subsets, str):
             subsets = [subsets]
 
         # Check if we have already indexed the files
-        cached_id_to_filepath = '/data/LibriSpeech__datasetid_to_filepath__subsets={}__length={}.json'.format(
+        cached_id_to_filepath_location = '/data/LibriSpeech__datasetid_to_filepath__subsets={}__length={}.json'.format(
             subsets, length)
-        cached_id_to_filepath = PATH + cached_id_to_filepath
+        cached_id_to_filepath_location = PATH + cached_id_to_filepath_location
 
-        cached_id_to_sex_filepath = '/data/LibriSpeech__datasetid_to_sex__subsets={}__length={}.json'.format(
+        cached_id_to_sex_location = '/data/LibriSpeech__datasetid_to_sex__subsets={}__length={}.json'.format(
             subsets, length)
-        cached_id_to_sex_filepath = PATH + cached_id_to_sex_filepath
+        cached_id_to_sex_location = PATH + cached_id_to_sex_location
 
-        cached_dictionaries_exist = os.path.exists(cached_id_to_filepath) and os.path.exists(cached_id_to_sex_filepath)
-        if cache == True and cached_dictionaries_exist:
+        cached_dictionaries_exist = os.path.exists(cached_id_to_filepath_location) \
+            and os.path.exists(cached_id_to_sex_location)
+        if cache and cached_dictionaries_exist:
             print('Cached indexes found.')
-            with open(cached_id_to_filepath) as f:
+            with open(cached_id_to_filepath_location) as f:
                 self.datasetid_to_filepath = json.load(f)
 
-            with open(cached_id_to_sex_filepath) as f:
+            with open(cached_id_to_sex_location) as f:
                 self.datasetid_to_sex = json.load(f)
+
+            # The dictionaries loaded from json have string type keys
+            # Convert them back to integers
+            self.datasetid_to_filepath = {int(k): v for k, v in self.datasetid_to_filepath.iteritems()}
+            self.datasetid_to_sex = {int(k): v for k, v in self.datasetid_to_sex.iteritems()}
+
+            assert(
+                len(self.datasetid_to_filepath) == len(self.datasetid_to_sex),
+                'Cached indexes are different lengths!'
+            )
 
             self.n_files = len(self.datasetid_to_filepath)
             print('{} usable files found.'.format(self.n_files))
@@ -65,11 +78,11 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
 
         # Get id -> sex mapping
         librispeech_id_to_sex = df[df['subset'].isin(subsets)][['id', 'sex']].to_dict()
-        self.librispeech_id_to_sex = {k: v for k, v in
-                                 zip(librispeech_id_to_sex['id'].values(), librispeech_id_to_sex['sex'].values())}
+        self.librispeech_id_to_sex = {
+            k: v for k, v in zip(librispeech_id_to_sex['id'].values(), librispeech_id_to_sex['sex'].values())}
         librispeech_id_to_name = df[df['subset'].isin(subsets)][['id', 'name']].to_dict()
-        self.librispeech_id_to_name = {k: v for k, v in
-                                 zip(librispeech_id_to_name['id'].values(), librispeech_id_to_name['name'].values())}
+        self.librispeech_id_to_name = {
+            k: v for k, v in zip(librispeech_id_to_name['id'].values(), librispeech_id_to_name['name'].values())}
 
         datasetid = 0
         self.n_files = 0
@@ -114,17 +127,17 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
 
         # Save relevant dictionaries to json in order to re-use them layer
         # The indexing takes a few minutes each time and would be nice to just perform this calculation once
-        with open(cached_id_to_filepath,'w') as f:
+        with open(cached_id_to_filepath_location, 'w') as f:
             json.dump(self.datasetid_to_filepath, f)
 
-        with open(cached_id_to_sex_filepath,'w') as f:
+        with open(cached_id_to_sex_location, 'w') as f:
             json.dump(self.datasetid_to_sex, f)
 
     def __getitem__(self, index):
         instance, samplerate = sf.read(self.datasetid_to_filepath[index])
         # Choose a random sample of the file
         if self.stochastic:
-            fragment_start_index = np.random.randint(0,len(instance)-self.fragment_length)
+            fragment_start_index = np.random.randint(0, len(instance)-self.fragment_length)
         else:
             fragment_start_index = 0
         instance = instance[fragment_start_index:fragment_start_index+self.fragment_length]
@@ -133,5 +146,3 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return self.n_files
-
-testset = LibriSpeechDataset('dev-clean',16000,stochastic=False)
