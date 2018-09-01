@@ -14,10 +14,10 @@ class TestWhitening(unittest.TestCase):
         test_data, sample_rate = sf.read(PATH + '/data/whitening_test_audio.flac')
         test_data = np.stack([test_data]*2)
 
-        whitened = whiten(torch.from_numpy(test_data),desired_rms)
+        whitened = whiten(torch.from_numpy(test_data), desired_rms)
 
         # Mean correct
-        self.assert_(np.isclose(whitened.mean().item(),0))
+        self.assert_(np.isclose(whitened.mean().item(), 0))
 
         # RMS correct
         self.assert_(np.isclose(np.sqrt(np.power(whitened[0,:], 2).mean()).item(), desired_rms))

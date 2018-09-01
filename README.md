@@ -7,14 +7,21 @@ The weights of the model from the article can be found in the `models/` director
 See my Medium article for more discussion.
 
 ## Instructions
-### Requirements
-Make a new virtualenv and instsall requirements from `requirements.txt`
+#### Requirements
+Make a new virtualenv and install requirements from `requirements.txt` with
+```
+pip install -r requirements.txt
+```
+This project was written in Python 2.7.12 so I cannot guarantee it works on
+any other version.
 
-### Run tests
+#### Run tests
 
-Pytest...
+```
+python -m unittest tests
+```
 
-### Data
+#### Data
 Get training data here: http://www.openslr.org/12
 - train-clean-100.tar.gz
 - train-clean-360.tar.gz
@@ -32,11 +39,11 @@ data/
 
 Please use the `SPEAKERS.TXT` supplied in the repo as I've made a few corrections to the one found at openslr.org.
 
-### Training
+#### Training
 
 Run `run_experiment.py` with the default parameters to train the model with the performance discussed in the article.
 
-## Process audio
+## Processing audio
 
 Run `process_audio.py`, specifying the model and audio file to use. The audio file must be a `.flac` file.
 
