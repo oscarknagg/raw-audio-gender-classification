@@ -8,7 +8,7 @@ import torch
 
 from config import PATH, LIBRISPEECH_SAMPLING_RATE
 from data import LibriSpeechDataset
-from models import ConvNet, DilatedNet
+from models import *
 from utils import whiten, evaluate
 
 
@@ -19,18 +19,18 @@ print('Training {} GPU support'.format('with' if torch.cuda.is_available() else 
 # Parameters #
 ##############
 n_seconds = 3
-downsampling = 8
+downsampling = 1
 batchsize = 8
 model_type = 'max_pooling'
-model_n_layers = 6
+model_n_layers = 7
 model_n_filters = 64
-model_dilation_depth = -1  # Only relevant for model_type == 'dilated'
-model_dilation_stacks = -1  # Only relevant for model_type == 'dilated'
-training_set = ['train-clean-100']
+model_dilation_depth = 7  # Only relevant for model_type == 'dilated'
+model_dilation_stacks = 1  # Only relevant for model_type == 'dilated'
+training_set = ['train-clean-100', 'train-clean-360']
 validation_set = 'dev-clean'
 learning_rate = 0.005
 momentum = 0.9
-n_epochs = 5
+n_epochs = 10
 reduce_lr_patience = 32
 evaluate_every_n_batches = 500
 
@@ -60,8 +60,8 @@ def preprocessor(batch):
 ###################
 # Create datasets #
 ###################
-trainset = LibriSpeechDataset(training_set, LIBRISPEECH_SAMPLING_RATE * n_seconds)
-testset = LibriSpeechDataset(validation_set, LIBRISPEECH_SAMPLING_RATE * n_seconds, stochastic=False)
+trainset = LibriSpeechDataset(training_set, int(LIBRISPEECH_SAMPLING_RATE * n_seconds))
+testset = LibriSpeechDataset(validation_set, int(LIBRISPEECH_SAMPLING_RATE * n_seconds), stochastic=False)
 trainloader = DataLoader(trainset, batch_size=batchsize, num_workers=4, shuffle=True, drop_last=True)
 testloader = DataLoader(testset, batch_size=batchsize, num_workers=4, drop_last=True)
 
@@ -77,6 +77,7 @@ else:
     raise(ValueError, 'Model type not recognised.')
 model.double()
 model.cuda()
+
 
 #############################
 # Define loss and optimiser #

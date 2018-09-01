@@ -3,6 +3,7 @@ Run this file to process an audio file with a particular model.
 
 Returns a csv file with prediction information and also a video file containing an animated prediction.
 """
+import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import resample
 import numpy as np
@@ -11,7 +12,7 @@ import soundfile as sf
 import json
 
 from config import PATH, LIBRISPEECH_SAMPLING_RATE
-from models import ConvNet, DilatedNet
+from models import *
 from utils import whiten
 
 import torch
@@ -23,7 +24,7 @@ print('Predicting {} GPU support'.format('with' if torch.cuda.is_available() els
 ##############
 # Parameters #
 ##############
-model_path = PATH + '/models/max_pooling__n_layers=6__n_filters=64__downsampling=4__n_seconds=3.torch'
+model_path = PATH + '/models/max_pooling__n_layers=7__n_filters=64__downsampling=1__n_seconds=3.torch'
 audio_path = PATH + '/data/Interview.flac'
 step_seconds = 0.04
 batchsize_for_prediction = 1
@@ -43,19 +44,19 @@ print('Audio duration: {}s'.format(audio_duration_seconds))
 ##############
 model_type = model_path.split('/')[-1].split('__')[0]
 model_name = model_path.split('/')[-1].split('.')[0]
-model_params = {i.split('=')[0]: int(i.split('=')[1]) for i in model_name.split('__')[1:]}
+model_params = {i.split('=')[0]: float(i.split('=')[1]) for i in model_name.split('__')[1:]}
 
 # Here we assume that the model was trained on the LibriSpeech dataset
 model_sampling_rate = LIBRISPEECH_SAMPLING_RATE/model_params['downsampling']
-model_num_samples = model_params['n_seconds']*model_sampling_rate
+model_num_samples = int(model_params['n_seconds']*model_sampling_rate)
 
 print('Model parameters determined from filename:')
 print(json.dumps(model_params, indent=4))
 
 if model_type == 'max_pooling':
-    model = ConvNet(model_params['n_filters'], model_params['n_layers'])
+    model = ConvNet(int(model_params['n_filters']), int(model_params['n_layers']))
 elif model_type == 'dilated':
-    model = DilatedNet(model_params['n_filters'], model_params['n_depth'], model_params['n_stacks'])
+    model = DilatedNet(int(model_params['n_filters']), int(model_params['n_depth']), int(model_params['n_stacks']))
 else:
     raise(ValueError, 'Model type not recognised.')
 
@@ -78,8 +79,12 @@ print('Looping through audio...')
 default_shape = None
 batch = []
 pred = []
-for lower in tqdm(range(0, audio.shape[0]-(model_params['n_seconds']*audio_sampling_rate), step_samples_at_audio_rate)):
-    x = audio[lower:lower+(model_params['n_seconds']*audio_sampling_rate)]
+for lower in tqdm(range(0, audio.shape[0]-(int(model_params['n_seconds']*audio_sampling_rate)), step_samples_at_audio_rate)):
+    x = audio[lower:lower+(int(model_params['n_seconds']*audio_sampling_rate))]
+
+    # Don't predict on the last bit of audio where the duration isn't large enough
+    if x.shape[0] != model_params['n_seconds']*audio_sampling_rate:
+        break
 
     x = torch.from_numpy(x).reshape(1, -1)
 
