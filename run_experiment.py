@@ -3,7 +3,6 @@ import time
 
 from torch.utils.data import DataLoader
 import torch.optim as optim
-import torch.nn as nn
 import torch
 
 from config import PATH, LIBRISPEECH_SAMPLING_RATE

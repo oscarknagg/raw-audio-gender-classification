@@ -3,7 +3,6 @@ Run this file to process an audio file with a particular model.
 
 Returns a csv file with prediction information and also a video file containing an animated prediction.
 """
-import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import resample
 import numpy as np

@@ -22,7 +22,7 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
         :param stochastic: If True then we will take a random fragment from each file of sufficient length. If False we
         wil always take a fragment starting at the beginning of a file.
         """
-        assert isinstance(length, (int, long))
+        assert isinstance(length, (int, long)), 'Length is not an integer!'
         self.subset = subsets
         self.fragment_length = length
         self.stochastic = stochastic
@@ -58,10 +58,7 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
             self.datasetid_to_filepath = {int(k): v for k, v in self.datasetid_to_filepath.iteritems()}
             self.datasetid_to_sex = {int(k): v for k, v in self.datasetid_to_sex.iteritems()}
 
-            assert(
-                len(self.datasetid_to_filepath) == len(self.datasetid_to_sex),
-                'Cached indexes are different lengths!'
-            )
+            assert len(self.datasetid_to_filepath) == len(self.datasetid_to_sex), 'Cached indexes are different lengths!'
 
             self.n_files = len(self.datasetid_to_filepath)
             print('{} usable files found.'.format(self.n_files))

@@ -1,7 +1,7 @@
 import torch
 
 
-def whiten(batch,rms=0.038021):
+def whiten(batch, rms=0.038021):
     """This function whitens a batch so each sample has 0 mean and the same root mean square amplitude i.e. volume."""
     # Subtract mean
     sample_wise_mean = batch.mean(dim=1)
